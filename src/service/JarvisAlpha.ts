@@ -24,7 +24,7 @@ export default async function assistantChat(request: ChatRequest){
             thread = await openAI.beta.threads.create()
             await initChat(thread.id)
             chatRoom = await ChatRoom
-                .findOneAndUpdate({id: request.chat_room_id}, {threadId: thread.id})
+                .findOneAndUpdate({_id: request.chat_room_id}, {threadId: thread.id})
         } else {
             thread = await openAI.beta.threads.retrieve(request.thread_id)
         }
