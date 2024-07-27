@@ -1,6 +1,5 @@
 import ChatRoom from "../entity/ChatRoom";
 import ChatMessage from "../entity/ChatMessage";
-import { Chat } from "openai/resources/beta";
 
 async function initiateChatRoom(userId: string) {
     try {
@@ -12,7 +11,7 @@ async function initiateChatRoom(userId: string) {
 
 async function getAllChatRoom(userId: string) {
     try {
-        return await ChatRoom.find({userId: userId})
+        return await ChatRoom.find({userId: userId}).sort({is_active: 'desc', timestamps: 'desc'}).exec()
     } catch (error) {
         console.error("[ERROR] Error when #getAllChatRooms:", error)
     }

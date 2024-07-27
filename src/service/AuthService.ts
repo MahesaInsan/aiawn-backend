@@ -13,11 +13,12 @@ async function login(req: LoginRequest) {
 
 async function register(req: RegisterRequest) {
     try {
-        const user = await User.findOne({name: req.name, phone: req.phone}).exec()
+        const user = await User.findOne({phone: req.phone}).exec()
         if (user) {
             console.info("[INFO] Found a user with the same phone number, return the existing user instead")
             return user
         } else {
+            console.log(req)
             return await User.create({
                 name: req.name,
                 phone: req.phone

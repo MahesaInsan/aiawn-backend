@@ -24,7 +24,9 @@ export default async function assistantChat(request: ChatRequest){
             await initChat(thread.id)
             chatRoom = await ChatRoom.create({
                 userId: request.user_id,
-                threadId: thread.id
+                threadId: thread.id,
+                timestamps: new Date().toISOString(),
+                is_active: true
             })
         } else {
             thread = await openAI.beta.threads.retrieve(request.thread_id)
