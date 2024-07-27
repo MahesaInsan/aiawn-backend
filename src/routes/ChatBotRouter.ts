@@ -152,3 +152,7 @@ chatRouter.post("/summary", async (req: Request, res: Response) => {
     res.send(await chatService.getAllChatRoom(userId))
 })
 
+chatRouter.post("/chatroom", async (req: Request, res: Response) => {
+    const userId: string = req.body.user_id;
+    res.send(await chatService.initiateChatRoom(userId))
+})
