@@ -21,6 +21,7 @@ export default async function assistantChat(request: ChatRequest){
         const assistant = await openAI.beta.assistants.retrieve(process.env.OPENAI_ASSISTANT_ID!)
         if (!request.thread_id || !request.chat_room_id) {
             thread = await openAI.beta.threads.create()
+            await initChat(thread.id)
             chatRoom = await ChatRoom.create({
                 userId: request.user_id,
                 threadId: thread.id
@@ -32,7 +33,8 @@ export default async function assistantChat(request: ChatRequest){
         const constructedMessageParam: MessageCreateParams = {
             role: "user",
             content: JSON.stringify({
-                message: request.message
+                message: request.message,
+                location: request.location
             })
         }
 
@@ -66,24 +68,24 @@ export default async function assistantChat(request: ChatRequest){
                 console.log("[LOG] Argument:", argument)
 
                 switch (toolCall.function.name) {
-                    case 'get_nearby_places':
-                        await googleApiIntegrator.fetchNearbyPlaces(argument.latitude, argument.longitude)
-                            .then((apiResponse) => {
-                                apiResponse?.places.map(place => {
-                                    ApiResponse.create({
-                                        id: place.id,
-                                        type: "PLACES",
-                                        attachment: place
-                                    })
-                                })
-                                tool_outputs.push({
-                                    tool_call_id: toolCall.id,
-                                    output: JSON.stringify({
-                                        apiResponse: apiResponse,
-                                    })
-                                })
-                            })
-                        break;
+                    // case 'get_nearby_places':
+                    //     await googleApiIntegrator.fetchNearbyPlaces(argument.latitude, argument.longitude)
+                    //         .then((apiResponse) => {
+                    //             apiResponse?.places.map(place => {
+                    //                 ApiResponse.create({
+                    //                     id: place.id,
+                    //                     type: "PLACES",
+                    //                     attachment: place
+                    //                 })
+                    //             })
+                    //             tool_outputs.push({
+                    //                 tool_call_id: toolCall.id,
+                    //                 output: JSON.stringify({
+                    //                     apiResponse: apiResponse,
+                    //                 })
+                    //             })
+                    //         })
+                    //     break;
                     case 'get_routes':
                         await googleApiIntegrator.fetchRoute(argument.originLatLng, argument.destinationLatLng)
                             .then((apiResponse) => {
@@ -180,4 +182,71 @@ export default async function assistantChat(request: ChatRequest){
     } catch (error) {
         console.error("[ERROR] Error when #callingAssistantChat: ", error)
     }
+}
+
+async function initChat(threadId: string) {
+    await openAI.beta.threads.messages.create(
+        threadId,
+        {
+            "role": "user",
+            "content": JSON.stringify({
+                "prompt": "I want spicy food",
+                "location": {
+                    "lat": -6.294797550790062,
+                    "lng": 106.78541623142699
+                },
+                "user_agent": "iPhone 15 Pro"
+            })
+        }
+    )
+    await openAI.beta.threads.messages.create(
+        threadId,
+        {
+            "role": "assistant",
+            "content": JSON.stringify({
+                "success": "true",
+                "reasoning": "First, I will use get_reverse_geocoding to convert user location into readable address. Next, I will find spicy food restaurants within the radius of that location using get_text_search. The function returns 20 top places, but I have filtered them to match user's preference which is spicy food. Then I return the places ID in for of array to be consumed by front-end.",
+                "message": "Here are some spicy food I found near your location.",
+                "places": [
+                    "ChIJL0KotdvxaS4RdV_kostfVrQ",
+                    "ChIJOZxMaK3laS4RJtPTRzJ8drk",
+                    "ChIJbzbB1-XxaS4R4T6I5BHOzOQ",
+                    "ChIJa6KdSZ3xaS4RpyyTndMGVs8"
+                ],
+                "next_action": [
+                    "Search for Indonesian food",
+                    "Search for food below Rp 50k"
+                ]
+            })
+        }
+    )
+    await openAI.beta.threads.messages.create(
+        threadId,
+        {
+            "role": "user",
+            "content": JSON.stringify({
+                "prompt": "What's 1 + 1?",
+                "location": {
+                    "lat": -6.294797550790062,
+                    "lng": 106.78541623142699
+                },
+                "user_agent": "iPhone 15 Pro"
+            })
+        }
+    )
+    await openAI.beta.threads.messages.create(
+        threadId,
+        {
+            "role": "assistant",
+            "content": JSON.stringify({
+                "success": "false",
+                "reasoning": "User requests outside of the service scope. I rejected the request.",
+                "message": "I'm sorry but we are unable to answer your question. If you have inquiry to search for a specific food, I'm here!",
+                "next_action": [
+                    "Search for food below Rp 50k",
+                    "What food do you recommend?"
+                ]
+            })
+        }
+    )
 }

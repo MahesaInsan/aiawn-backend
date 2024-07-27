@@ -5,39 +5,39 @@ import GoogleGeocodingResponse from "../models/response/GoogleGeocodingResponse"
 import GoogleReverseGeocodingResponse from "../models/response/GoogleReverseGeocodingResponse";
 import routeResponseFormatter from "../models/helper/RouteResponseFormatter";
 
-async function fetchNearbyPlaces(lat: number, lng: number){
-    try {
-        console.log(lat, lng)
-        return await axios.post(
-            "https://places.googleapis.com/v1/places:searchNearby",
-            {
-                "includedTypes": ["restaurant", "cafe"],
-                "excludedTypes": ["hotel", "shopping_mall"],
-                "maxResultCount": 20,
-                "locationRestriction": {
-                    "circle": {
-                        "center": {
-                            "latitude": lat,
-                            "longitude": lng
-                        },
-                        "radius":5000.0
-                    }
-                }
-            },
-            {
-                headers: {
-                    "X-Goog-Api-Key": process.env.GOOGLE_API_KEY,
-                    "X-Goog-FieldMask": "places.displayName,places.priceLevel,places.id"
-                }
-            }).then((axiosResponse) => {
-                const integratorResponse: GooglePlacesResponse = axiosResponse.data
-                console.log(integratorResponse)
-                return integratorResponse
-            })
-    } catch (error) {
-        console.error("error calling #fetchNearbyPlaces: ", error)
-    }
-}
+// async function fetchNearbyPlaces(lat: number, lng: number){
+//     try {
+//         console.log(lat, lng)
+//         return await axios.post(
+//             "https://places.googleapis.com/v1/places:searchNearby",
+//             {
+//                 "includedTypes": ["restaurant", "cafe"],
+//                 "excludedTypes": ["hotel", "shopping_mall"],
+//                 "maxResultCount": 20,
+//                 "locationRestriction": {
+//                     "circle": {
+//                         "center": {
+//                             "latitude": lat,
+//                             "longitude": lng
+//                         },
+//                         "radius":5000.0
+//                     }
+//                 }
+//             },
+//             {
+//                 headers: {
+//                     "X-Goog-Api-Key": process.env.GOOGLE_API_KEY,
+//                     "X-Goog-FieldMask": "places.displayName,places.priceLevel,places.id"
+//                 }
+//             }).then((axiosResponse) => {
+//                 const integratorResponse: GooglePlacesResponse = axiosResponse.data
+//                 console.log(integratorResponse)
+//                 return integratorResponse
+//             })
+//     } catch (error) {
+//         console.error("error calling #fetchNearbyPlaces: ", error)
+//     }
+// }
 
 async function fetchRoute(originLatLng: string, destinationLatLng: string){
     try {
@@ -140,7 +140,7 @@ async function fetchReverseGeocoding(latLng: string){
 }
 
 const googleApiIntegrators = {
-    fetchNearbyPlaces,
+    // fetchNearbyPlaces,
     fetchRoute,
     fetchTextSearchResult,
     fetchGeocoding,

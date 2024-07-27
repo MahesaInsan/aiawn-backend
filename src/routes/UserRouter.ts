@@ -29,7 +29,7 @@ import authService from "../service/AuthService";
  *         - phone
  *       properties:
  *         phone:
- *           type: number
+ *           type: string
  *           description: user's phone number
  *
  *     RegisterResponse:

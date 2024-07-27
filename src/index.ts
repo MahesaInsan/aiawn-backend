@@ -35,6 +35,10 @@ mongoose.Promise = Promise;
 mongoose.connect(process.env.MONGO_URI || "").then(r => console.log("[SERVER] MongoDB are Connected"))
 mongoose.connection.on('error', (error) => console.error("[ERROR] Error Connecting MongoDB"))
 
+app.get('/healthcheck', (req, res) => {
+    return res.json({message: "Success"}).status(200);
+})
+
 app.use("/api-docs",
     swaggerUi.serve,
     swaggerUi.setup(specs))
