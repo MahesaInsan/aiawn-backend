@@ -3,7 +3,7 @@ import ChatMessage from "../entity/ChatMessage";
 
 async function initiateChatRoom(userId: string) {
     try {
-        return await ChatRoom.create({userId: userId})
+        return await ChatRoom.create({userId: userId, timestamps: new Date().toISOString(), is_active: true})
     } catch (error) {
         console.error("[ERROR] Error when #initiateChatRoom:", error)
     }
