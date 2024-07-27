@@ -22,12 +22,8 @@ export default async function assistantChat(request: ChatRequest){
         if (!request.thread_id || !request.chat_room_id) {
             thread = await openAI.beta.threads.create()
             await initChat(thread.id)
-            chatRoom = await ChatRoom.create({
-                userId: request.user_id,
-                threadId: thread.id,
-                timestamps: new Date().toISOString(),
-                is_active: true
-            })
+            chatRoom = await ChatRoom
+                .findOneAndUpdate({id: request.chat_room_id}, {threadId: thread.id})
         } else {
             thread = await openAI.beta.threads.retrieve(request.thread_id)
         }
@@ -173,7 +169,7 @@ export default async function assistantChat(request: ChatRequest){
                 chatRoomId: chatRoom!.id,
                 role: "assistant",
                 message: JSON.parse(content.text.value).message,
-                tool_id: JSON.parse(content.text.value).call_id
+                tool_id: JSON.parse(content.text.value).places
             })
             return {
                 code: 200,
