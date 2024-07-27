@@ -37,6 +37,6 @@ app.use(cors())
 app.use("/api/chat", chatBotRouter);
 
 app.listen(port, () => {
-    console.log("[SERVER] Server running port: ", port)
+    console.log("[SERVER] Server running port:", port)
 })
 

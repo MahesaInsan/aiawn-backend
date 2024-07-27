@@ -1,5 +1,5 @@
 import {Router, Request, Response} from "express";
-import {ChatRequest} from "../models/ChatRequest";
+import {ChatRequest} from "../models/request/ChatRequest";
 import assistantChat from "../service/JarvisAlpha";
 
 // Swagger Documentation for ChatBotRouter
