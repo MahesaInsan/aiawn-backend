@@ -3,6 +3,7 @@ import User from "../entity/User";
 import RegisterRequest from "../models/request/RegisterRequest";
 
 async function login(req: LoginRequest) {
+    console.log(req.phone)
     try {
         return await User.findOne({phone: req.phone}).exec()
     } catch (error) {

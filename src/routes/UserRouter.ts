@@ -132,13 +132,13 @@ userRouter.post("/_login", async (req: Request, res: Response) => {
     const request: LoginRequest = req.body
     const user = await authService.login(request)
     if (user) {
-        res.send({
+        res.status(200).send({
             code: 200,
             status: "OK",
             data: user
         })
     } else {
-        res.send({
+        res.status(400).send({
             code: 400,
             status: "BAD_REQUEST",
             data: false
@@ -150,13 +150,13 @@ userRouter.post("/_register", async (req: Request, res: Response) => {
     const request: RegisterRequest = req.body
     const user = await authService.register(request)
     if (user) {
-        res.send({
+        res.status(200).send({
             code: 200,
             status: "OK",
             data: user
         })
     } else {
-        res.send({
+        res.status(400).send({
             code: 400,
             status: "BAD_REQUEST",
             data: false
