@@ -1,7 +1,6 @@
 import {Router, Request, Response} from "express";
-import {ChatRequest} from "../models/request/ChatRequest";
 import assistantChat from "../service/JarvisAlpha";
-import chatService from "../service/ChatService";
+import getAllAttachment from "../service/AttachmentService";
 
 // Swagger Documentation for ChatBotRouter
 /**
@@ -135,28 +134,9 @@ import chatService from "../service/ChatService";
  *
  */
 
-export const chatRouter = Router()
+export const attachmentRouter = Router()
 
-chatRouter.post("/_submit", async (req: Request, res: Response) => {
-    const request: ChatRequest = req.body
-    res.send(await assistantChat(request))
-})
-
-chatRouter.get("/:roomId/history", async (req: Request, res: Response) => {
-    const chatRoomId: string = req.params["roomId"]
-    res.send(await chatService.getChatHistory(chatRoomId))
-})
-
-chatRouter.post("/summary", async (req: Request, res: Response) => {
-    const userId: string = req.body.user_id;
-    res.send(await chatService.getAllChatRoom(userId))
-})
-
-chatRouter.post("/chatroom", async (req: Request, res: Response) => {
-    const userId: string = req.body.user_id;
-    try {
-        res.status(200).send(await chatService.initiateChatRoom(userId))
-    } catch {
-        res.status(400).send("ERROR")
-    }
+attachmentRouter.post("/", async (req: Request, res: Response) => {
+    const request: string[] = req.body.attachments
+    res.send(await getAllAttachment(request))
 })

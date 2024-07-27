@@ -8,8 +8,9 @@ import googleApiIntegrator from "../integrators/GoogleApiIntegrator";
 import ChatRoom from "../entity/ChatRoom";
 import chatRoom from "../entity/ChatRoom";
 import ChatMessage from "../entity/ChatMessage";
-import ApiResponse from "../entity/ApiResponse";
+import Attachment from "../entity/Attachment";
 import chatMessage from "../entity/ChatMessage";
+import PlaceResponseFormatter from "../models/helper/PlaceResponseFormatter";
 
 const openAI = new OpenAI({apiKey: process.env.OPENAI_API_KEY})
 let thread: Thread
@@ -70,10 +71,10 @@ export default async function assistantChat(request: ChatRequest){
                     //     await googleApiIntegrator.fetchNearbyPlaces(argument.latitude, argument.longitude)
                     //         .then((apiResponse) => {
                     //             apiResponse?.places.map(place => {
-                    //                 ApiResponse.create({
+                    //                 Attachment.create({
                     //                     id: place.id,
                     //                     type: "PLACES",
-                    //                     attachment: place
+                    //                     data: place
                     //                 })
                     //             })
                     //             tool_outputs.push({
@@ -87,10 +88,10 @@ export default async function assistantChat(request: ChatRequest){
                     case 'get_routes':
                         await googleApiIntegrator.fetchRoute(argument.originLatLng, argument.destinationLatLng)
                             .then((apiResponse) => {
-                                ApiResponse.create({
+                                Attachment.create({
                                     id: toolCall.id,
                                     type: "ROUTES",
-                                    attachment: apiResponse
+                                    data: apiResponse
                                 })
                                 tool_outputs.push({
                                     tool_call_id: toolCall.id,
@@ -104,11 +105,13 @@ export default async function assistantChat(request: ChatRequest){
                     case 'get_text_search':
                         await googleApiIntegrator.fetchTextSearchResult(argument.textQuery)
                             .then((apiResponse) => {
-                                apiResponse?.places.map(place => {
-                                    ApiResponse.create({
-                                        id: place.id,
+                                const formattedResponse = PlaceResponseFormatter(apiResponse!)
+                                formattedResponse.places.map(place => {
+                                    console.log(place)
+                                    Attachment.create({
+                                        id: place.placeId,
                                         type: "PLACES",
-                                        attachment: place
+                                        data: place
                                     })
                                 })
                                 tool_outputs.push({
@@ -169,7 +172,7 @@ export default async function assistantChat(request: ChatRequest){
                 chatRoomId: chatRoom!.id,
                 role: "assistant",
                 message: JSON.parse(content.text.value).message,
-                tool_id: JSON.parse(content.text.value).places
+                attachment: JSON.parse(content.text.value).places
             })
             return {
                 code: 200,

@@ -4,6 +4,7 @@ import GoogleRouteResponse from "../models/response/GoogleRouteResponse";
 import GoogleGeocodingResponse from "../models/response/GoogleGeocodingResponse";
 import GoogleReverseGeocodingResponse from "../models/response/GoogleReverseGeocodingResponse";
 import routeResponseFormatter from "../models/helper/RouteResponseFormatter";
+import PlaceResponseFormatter from "../models/helper/PlaceResponseFormatter";
 
 // async function fetchNearbyPlaces(lat: number, lng: number){
 //     try {
@@ -96,11 +97,11 @@ async function fetchTextSearchResult(textQuery: string){
             {
                 headers:{
                     "X-Goog-Api-Key": process.env.GOOGLE_API_KEY,
-                    "X-Goog-FieldMask": "places.displayName,places.priceLevel,places.id"
+                    "X-Goog-FieldMask": "places.displayName,places.priceLevel,places.primaryType," +
+                        "places.primaryTypeDisplayName,places.id,places.rating,places.userRatingCount,places.photos"
                 }
             }).then((response ) => {
                 const integratorResponse: GooglePlacesResponse = response.data
-                console.log(integratorResponse)
                 return integratorResponse
             })
     } catch (error) {

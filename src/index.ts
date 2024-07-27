@@ -8,6 +8,8 @@ import swaggerUi from "swagger-ui-express";
 import mongoose, {mongo} from "mongoose";
 import authService from "./service/AuthService";
 import {userRouter} from "./routes/UserRouter";
+import attachment from "./entity/Attachment";
+import {attachmentRouter} from "./routes/AttachmentRouter";
 
 const app: Express = express();
 const port = process.env.PORT || 8000;
@@ -47,6 +49,7 @@ app.use(cors())
 
 app.use("/api/chat", chatRouter);
 app.use("/api/users", userRouter);
+app.use("/api/attachments", attachmentRouter)
 
 app.listen(port, () => {
     console.log("[SERVER] Server running port:", port)

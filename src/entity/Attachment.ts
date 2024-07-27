@@ -3,9 +3,9 @@ import mongoose, {Schema} from 'mongoose'
 const schema = new Schema({
     id: {type: String, required: true},
     type: {type: String, required: true},
-    attachment: {type: Object, required: true}
+    data: {type: Object, required: true}
 })
 
-const ApiResponse = mongoose.model("ApiResponse", schema)
+const Attachment = mongoose.model("Attachment", schema)
 
-export default ApiResponse;
+export default Attachment;

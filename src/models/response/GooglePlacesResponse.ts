@@ -8,6 +8,13 @@ export default interface GooglePlacesResponse{
             text: string
         },
         primaryType?: string;
+        rating: number;
+        userRatingCount: number;
+        photos?: {
+            authorAttributions?: {
+                uri: string;
+            }[]
+        }[]
         id: string;
     }[]
 }
