@@ -1,5 +1,14 @@
 import ChatRoom from "../entity/ChatRoom";
 import ChatMessage from "../entity/ChatMessage";
+import { Chat } from "openai/resources/beta";
+
+async function initiateChatRoom(userId: string) {
+    try {
+        return await ChatRoom.create({userId: userId})
+    } catch (error) {
+        console.error("[ERROR] Error when #initiateChatRoom:", error)
+    }
+}
 
 async function getAllChatRoom(userId: string) {
     try {
@@ -20,7 +29,8 @@ async function getChatHistory(chatRoomIdReq: string) {
 
 const chatService = {
     getAllChatRoom,
-    getChatHistory
+    getChatHistory,
+    initiateChatRoom
 }
 
 export default chatService
