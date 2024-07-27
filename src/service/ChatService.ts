@@ -26,7 +26,16 @@ async function getChatHistory(chatRoomIdReq: string) {
     }
 }
 
+async function finalizeChat(chatRoomIdReq: string){
+    try {
+        return await ChatRoom.findOneAndUpdate({_id: chatRoomIdReq}, {is_active: false})
+    } catch (error) {
+        console.error("[ERROR] Error when #finalizingChat", error)
+    }
+}
+
 const chatService = {
+    finalizeChat,
     getAllChatRoom,
     getChatHistory,
     initiateChatRoom

@@ -26,6 +26,7 @@ export default async function assistantChat(request: ChatRequest){
             chatRoom = await ChatRoom
                 .findOneAndUpdate({_id: request.chat_room_id}, {threadId: thread.id})
         } else {
+            chatRoom = await ChatRoom.findOne({_id: request.chat_room_id})
             thread = await openAI.beta.threads.retrieve(request.thread_id)
         }
 
@@ -177,7 +178,11 @@ export default async function assistantChat(request: ChatRequest){
             return {
                 code: 200,
                 status: "OK",
-                data: JSON.parse(content.text.value)
+                data: {
+                    gptData: JSON.parse(content.text.value),
+                    thread_id: thread.id,
+                    chat_room_id: chatRoom?.id
+                }
             }
         }
     } catch (error) {

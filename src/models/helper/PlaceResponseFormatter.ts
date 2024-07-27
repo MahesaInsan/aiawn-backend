@@ -3,7 +3,7 @@ import FormattedPlaceResponse from "../response/FormattedPlaceResponse";
 
 const PlaceResponseFormatter = (placesResponse: GooglePlacesResponse) =>{
     let formattedPlaceResponse: FormattedPlaceResponse = {places: []}
-    placesResponse.places.map((place) => {
+    placesResponse.places?.map((place) => {
         return formattedPlaceResponse.places.push(
             {
                 placeId: place.id,

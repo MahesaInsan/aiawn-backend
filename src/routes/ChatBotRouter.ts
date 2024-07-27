@@ -138,6 +138,7 @@ import chatService from "../service/ChatService";
 export const chatRouter = Router()
 
 chatRouter.post("/_submit", async (req: Request, res: Response) => {
+    console.log(req)
     const request: ChatRequest = req.body
     res.send(await assistantChat(request))
 })
@@ -156,6 +157,15 @@ chatRouter.post("/chatroom", async (req: Request, res: Response) => {
     const userId: string = req.body.user_id;
     try {
         res.status(200).send(await chatService.initiateChatRoom(userId))
+    } catch {
+        res.status(400).send("ERROR")
+    }
+})
+
+chatRouter.post("/_finalize", async (req: Request, res: Response) => {
+    const chatRoomId: string = req.body.chat_room_id;
+    try {
+        res.status(200).send(await chatService.finalizeChat(chatRoomId))
     } catch {
         res.status(400).send("ERROR")
     }
