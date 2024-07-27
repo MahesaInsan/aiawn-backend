@@ -1,10 +1,13 @@
 import express, {Express, Request, Response} from "express";
 import cors from "cors"
 import "dotenv/config"
-import {chatBotRouter} from "./routes/ChatBotRouter";
+import {chatRouter} from "./routes/ChatBotRouter";
 import bodyParser from "body-parser";
 import swaggerJsdoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express"
+import swaggerUi from "swagger-ui-express";
+import mongoose, {mongo} from "mongoose";
+import authService from "./service/AuthService";
+import {userRouter} from "./routes/UserRouter";
 
 const app: Express = express();
 const port = process.env.PORT || 8000;
@@ -28,13 +31,18 @@ const options ={
 }
 const specs = swaggerJsdoc(options);
 
+mongoose.Promise = Promise;
+mongoose.connect(process.env.MONGO_URI || "").then(r => console.log("[SERVER] MongoDB are Connected"))
+mongoose.connection.on('error', (error) => console.error("[ERROR] Error Connecting MongoDB"))
+
 app.use("/api-docs",
     swaggerUi.serve,
     swaggerUi.setup(specs))
 app.use(express.json())
 app.use(cors())
 
-app.use("/api/chat", chatBotRouter);
+app.use("/api/chat", chatRouter);
+app.use("/api/users", userRouter);
 
 app.listen(port, () => {
     console.log("[SERVER] Server running port:", port)

@@ -1,14 +1,10 @@
 export interface ChatRequest{
     user_agent: string,
     thread_id?: string,
-    credential: Credential
+    chat_room_id?: string,
+    user_id: string,
     message: string,
     location: Location
-}
-
-interface Credential{
-    name: string,
-    phone: string
 }
 
 interface Location{

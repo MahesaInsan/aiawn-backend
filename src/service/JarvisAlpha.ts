@@ -5,18 +5,26 @@ import MessageCreateParams = Threads.MessageCreateParams;
 import {Messages} from "openai/resources/beta/threads";
 import TextContentBlock = Messages.TextContentBlock;
 import googleApiIntegrator from "../integrators/GoogleApiIntegrator";
+import ChatRoom from "../entity/ChatRoom";
+import chatRoom from "../entity/ChatRoom";
+import ChatMessage from "../entity/ChatMessage";
+import ApiResponse from "../entity/ApiResponse";
+import chatMessage from "../entity/ChatMessage";
 
 const openAI = new OpenAI({apiKey: process.env.OPENAI_API_KEY})
 let thread: Thread
 
 export default async function assistantChat(request: ChatRequest){
     try {
-        let loggedToolCall: string[] = []
-
+        let chatRoom;
         console.log("[LOG] Assistant Bot is Called")
         const assistant = await openAI.beta.assistants.retrieve(process.env.OPENAI_ASSISTANT_ID!)
-        if (!request.thread_id) {
+        if (!request.thread_id || !request.chat_room_id) {
             thread = await openAI.beta.threads.create()
+            chatRoom = await ChatRoom.create({
+                userId: request.user_id,
+                threadId: thread.id
+            })
         } else {
             thread = await openAI.beta.threads.retrieve(request.thread_id)
         }
@@ -24,7 +32,7 @@ export default async function assistantChat(request: ChatRequest){
         const constructedMessageParam: MessageCreateParams = {
             role: "user",
             content: JSON.stringify({
-                message: request
+                message: request.message
             })
         }
 
@@ -32,6 +40,12 @@ export default async function assistantChat(request: ChatRequest){
             thread.id,
             constructedMessageParam
         )
+
+        await ChatMessage.create({
+            chatRoomId: chatRoom!.id,
+            role: "user",
+            message: request.message
+        })
 
         let run = await openAI.beta.threads.runs.createAndPoll(
             thread.id,
@@ -55,18 +69,29 @@ export default async function assistantChat(request: ChatRequest){
                     case 'get_nearby_places':
                         await googleApiIntegrator.fetchNearbyPlaces(argument.latitude, argument.longitude)
                             .then((apiResponse) => {
+                                apiResponse?.places.map(place => {
+                                    ApiResponse.create({
+                                        id: place.id,
+                                        type: "PLACES",
+                                        attachment: place
+                                    })
+                                })
                                 tool_outputs.push({
                                     tool_call_id: toolCall.id,
                                     output: JSON.stringify({
                                         apiResponse: apiResponse,
                                     })
                                 })
-                                loggedToolCall.push(toolCall.id)
                             })
                         break;
                     case 'get_routes':
                         await googleApiIntegrator.fetchRoute(argument.originLatLng, argument.destinationLatLng)
                             .then((apiResponse) => {
+                                ApiResponse.create({
+                                    id: toolCall.id,
+                                    type: "ROUTES",
+                                    attachment: apiResponse
+                                })
                                 tool_outputs.push({
                                     tool_call_id: toolCall.id,
                                     output: JSON.stringify({
@@ -74,19 +99,24 @@ export default async function assistantChat(request: ChatRequest){
                                         tool_call_id: toolCall.id
                                     })
                                 })
-                                loggedToolCall.push(toolCall.id)
                             })
                         break;
                     case 'get_text_search':
                         await googleApiIntegrator.fetchTextSearchResult(argument.textQuery)
                             .then((apiResponse) => {
+                                apiResponse?.places.map(place => {
+                                    ApiResponse.create({
+                                        id: place.id,
+                                        type: "PLACES",
+                                        attachment: place
+                                    })
+                                })
                                 tool_outputs.push({
                                     tool_call_id: toolCall.id,
                                     output: JSON.stringify({
                                         apiResponse: apiResponse,
                                     })
                                 })
-                                loggedToolCall.push(toolCall.id)
                             })
                         break;
                     case 'get_geocoding':
@@ -134,6 +164,13 @@ export default async function assistantChat(request: ChatRequest){
         if (run.status == "completed") {
             const messages = await openAI.beta.threads.messages.list(thread.id)
             const content = messages.data[0].content[0] as TextContentBlock
+            console.log(JSON.parse(content.text.value))
+            await chatMessage.create({
+                chatRoomId: chatRoom!.id,
+                role: "assistant",
+                message: JSON.parse(content.text.value).message,
+                tool_id: JSON.parse(content.text.value).call_id
+            })
             return {
                 code: 200,
                 status: "OK",

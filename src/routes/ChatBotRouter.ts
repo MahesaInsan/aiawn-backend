@@ -1,6 +1,7 @@
 import {Router, Request, Response} from "express";
 import {ChatRequest} from "../models/request/ChatRequest";
 import assistantChat from "../service/JarvisAlpha";
+import chatService from "../service/ChatService";
 
 // Swagger Documentation for ChatBotRouter
 /**
@@ -14,13 +15,13 @@ import assistantChat from "../service/JarvisAlpha";
  *       properties:
  *         user_agent:
  *           type: string
- *           description: existing thread id
+ *           description: user's device
  *         thread_id:
  *           type: string
  *           description: existing thread id
- *         credential:
- *           type: object
- *           $ref: '#/components/schemas/Credential'
+ *         user_id:
+ *           type: string
+ *           description: user's id
  *         message:
  *           type: string
  *           description: message to be sent to the bot
@@ -38,31 +39,23 @@ import assistantChat from "../service/JarvisAlpha";
  *           type: number
  *           description: longitude of the user's location
  *
- *     Credential:
+ *     ChatSummaryRequest:
  *       type: object
+ *       required:
+ *         - user_id
  *       properties:
- *         name:
+ *         user_id:
  *           type: string
- *           description: user's name
- *         phone:
- *           type: string
- *           description: user's string
+ *           description: user's id
  *
- *     ChatResponse:
+ *     ChatHistoryRequest:
  *       type: object
+ *       required:
+ *         - room_id
  *       properties:
- *         timestamp:
- *           type: number
- *           description: timestamp in epoch
- *         thread_id:
+ *         room_id:
  *           type: string
- *           description: chat's thread id
- *         message:
- *           type: object
- *           $ref: '#/components/schemas/Message'
- *         call_id:
- *           type: array
- *           description: call id string
+ *           description: room's id
  *
  *     Message:
  *       type: object
@@ -80,7 +73,7 @@ import assistantChat from "../service/JarvisAlpha";
  * tags:
  *   name: Chat
  *   description: Chat API
- * /api/chat:
+ * /api/chat/_submit:
  *   post:
  *     summary: send chat to assistant
  *     tags: [Chat]
@@ -100,11 +93,62 @@ import assistantChat from "../service/JarvisAlpha";
  *       500:
  *         description: Some server error
  *
+ * /api/chat/{roomId}/history:
+ *   get:
+ *     summary: get chat history
+ *     tags: [Chat]
+ *     parameters:
+ *     - in: path
+ *       name: roomId
+ *       description: Room ID
+ *       type: string
+ *       required: true
+ *     responses:
+ *       200:
+ *         description: chat response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ChatResponse'
+ *       500:
+ *         description: Some server error
+ *
+ * /api/chat/summary:
+ *   post:
+ *     summary: get chat summary
+ *     tags: [Chat]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ChatSummaryRequest'
+ *     responses:
+ *       200:
+ *         description: chat response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ChatResponse'
+ *       500:
+ *         description: Some server error
+ *
  */
 
-export const chatBotRouter = Router()
+export const chatRouter = Router()
 
-chatBotRouter.post("/", async (req: Request, res: Response) => {
+chatRouter.post("/_submit", async (req: Request, res: Response) => {
     const request: ChatRequest = req.body
     res.send(await assistantChat(request))
 })
+
+chatRouter.get("/:roomId/history", async (req: Request, res: Response) => {
+    const chatRoomId: string = req.params["roomId"]
+    res.send(await chatService.getChatHistory(chatRoomId))
+})
+
+chatRouter.post("/summary", async (req: Request, res: Response) => {
+    const userId: string = req.body.user_id;
+    res.send(await chatService.getAllChatRoom(userId))
+})
+
