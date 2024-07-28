@@ -37,7 +37,7 @@ Send chat to GRABesk bot
 ```
 
 - Method:
-```json
+```txt
 POST
 ```
 - Request Body:
@@ -66,17 +66,17 @@ Get user's chat details history
 ```
 
 - Method:
-```json
+```txt
 GET
 ```
 
 - Path Variable:
-```json
+```txt
 roomId
 ```
 
 - Request Body:
-```json
+```txt
 -
 ```
 
@@ -90,7 +90,7 @@ Get list of user's chat
 ```
 
 - Method:
-```json
+```txt
 POST 
 ```
 
@@ -111,7 +111,7 @@ Initiate new chat room
 ```
 
 - Method:
-```json
+```txt
 POST 
 ```
 
@@ -132,7 +132,7 @@ Finalize chat room
 ```
 
 - Method:
-```json
+```txt
 POST
 ```
 
@@ -155,7 +155,7 @@ Endpoint for user to log in
 ```
 
 - Method:
-```json
+```txt
 POST
 ```
 
@@ -176,7 +176,7 @@ Endpoint for user to register
 ```
 
 - Method:
-```json
+```txt
 POST
 ```
 
@@ -201,7 +201,7 @@ Fetch all attachment
 ```
 
 - Method:
-```json
+```txt
 POST
 ```
 
