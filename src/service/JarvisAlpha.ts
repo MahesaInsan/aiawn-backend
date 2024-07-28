@@ -167,6 +167,9 @@ export default async function assistantChat(request: ChatRequest){
                 message: JSON.parse(content.text.value).message,
                 attachment: JSON.parse(content.text.value).places
             })
+            axios.post("http://localhost:8000/summarizzler", {
+                "chat_room_id": chatRoom?.id
+            })
             return {
                 code: 200,
                 status: "OK",
