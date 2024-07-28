@@ -97,9 +97,11 @@ export default async function assistantChat(request: ChatRequest){
                         await googleApiIntegrator.fetchTextSearchResult(argument.textQuery)
                             .then(async (apiResponse) => {
                                 const formattedResponse = PlaceResponseFormatter(apiResponse!)
-                                formattedResponse.places.map(async (place) => {
-                                    console.log(place)
-                                    if(! await Attachment.findOne({id: place.placeId}).exec()){
+
+                                formattedResponse.places.forEach(async(place) => {
+                                    const data = await Attachment.findOne({ id: place.placeId })
+
+                                    if(!data) {
                                         await Attachment.create({
                                             id: place.placeId,
                                             type: "PLACES",
@@ -107,6 +109,7 @@ export default async function assistantChat(request: ChatRequest){
                                         })
                                     }
                                 })
+ 
                                 tool_outputs.push({
                                     tool_call_id: toolCall.id,
                                     output: JSON.stringify({
