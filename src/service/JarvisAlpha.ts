@@ -6,17 +6,18 @@ import {Messages} from "openai/resources/beta/threads";
 import TextContentBlock = Messages.TextContentBlock;
 import googleApiIntegrator from "../integrators/GoogleApiIntegrator";
 import ChatRoom from "../entity/ChatRoom";
-import chatRoom from "../entity/ChatRoom";
 import ChatMessage from "../entity/ChatMessage";
 import Attachment from "../entity/Attachment";
 import chatMessage from "../entity/ChatMessage";
 import PlaceResponseFormatter from "../models/helper/PlaceResponseFormatter";
+import axios from "axios";
 
 const openAI = new OpenAI({apiKey: process.env.OPENAI_API_KEY})
 let thread: Thread
 
 export default async function assistantChat(request: ChatRequest){
     try {
+        console.log(request)
         let chatRoom;
         console.log("[LOG] Assistant Bot is Called")
         const assistant = await openAI.beta.assistants.retrieve(process.env.OPENAI_ASSISTANT_ID!)
@@ -38,6 +39,8 @@ export default async function assistantChat(request: ChatRequest){
             })
         }
 
+        console.log("message created")
+
         await openAI.beta.threads.messages.create(
             thread.id,
             constructedMessageParam
@@ -49,6 +52,8 @@ export default async function assistantChat(request: ChatRequest){
             message: request.message
         })
 
+        console.log("chat message created")
+
         let run = await openAI.beta.threads.runs.createAndPoll(
             thread.id,
             {
@@ -56,7 +61,10 @@ export default async function assistantChat(request: ChatRequest){
             }
         )
 
+        console.log("created  run")
+
         while(run.status != "completed") {
+            console.log("running")
             let tool_outputs: {
                 tool_call_id: string,
                 output?: string
@@ -68,24 +76,6 @@ export default async function assistantChat(request: ChatRequest){
                 console.log("[LOG] Argument:", argument)
 
                 switch (toolCall.function.name) {
-                    // case 'get_nearby_places':
-                    //     await googleApiIntegrator.fetchNearbyPlaces(argument.latitude, argument.longitude)
-                    //         .then((apiResponse) => {
-                    //             apiResponse?.places.map(place => {
-                    //                 Attachment.create({
-                    //                     id: place.id,
-                    //                     type: "PLACES",
-                    //                     data: place
-                    //                 })
-                    //             })
-                    //             tool_outputs.push({
-                    //                 tool_call_id: toolCall.id,
-                    //                 output: JSON.stringify({
-                    //                     apiResponse: apiResponse,
-                    //                 })
-                    //             })
-                    //         })
-                    //     break;
                     case 'get_routes':
                         await googleApiIntegrator.fetchRoute(argument.originLatLng, argument.destinationLatLng)
                             .then((apiResponse) => {
@@ -105,15 +95,17 @@ export default async function assistantChat(request: ChatRequest){
                         break;
                     case 'get_text_search':
                         await googleApiIntegrator.fetchTextSearchResult(argument.textQuery)
-                            .then((apiResponse) => {
+                            .then(async (apiResponse) => {
                                 const formattedResponse = PlaceResponseFormatter(apiResponse!)
-                                formattedResponse.places.map(place => {
+                                formattedResponse.places.map(async (place) => {
                                     console.log(place)
-                                    Attachment.create({
-                                        id: place.placeId,
-                                        type: "PLACES",
-                                        data: place
-                                    })
+                                    if(! await Attachment.findOne({id: place.placeId}).exec()){
+                                        await Attachment.create({
+                                            id: place.placeId,
+                                            type: "PLACES",
+                                            data: place
+                                        })
+                                    }
                                 })
                                 tool_outputs.push({
                                     tool_call_id: toolCall.id,
