@@ -76,31 +76,12 @@ export default async function assistantChat(request: ChatRequest){
                 console.log("[LOG] Argument:", argument)
 
                 switch (toolCall.function.name) {
-                    case 'get_routes':
-                        await googleApiIntegrator.fetchRoute(argument.originLatLng, argument.destinationLatLng)
-                            .then((apiResponse) => {
-                                Attachment.create({
-                                    id: toolCall.id,
-                                    type: "ROUTES",
-                                    data: apiResponse
-                                })
-                                tool_outputs.push({
-                                    tool_call_id: toolCall.id,
-                                    output: JSON.stringify({
-                                        apiResponse: apiResponse,
-                                        tool_call_id: toolCall.id
-                                    })
-                                })
-                            })
-                        break;
                     case 'get_text_search':
                         await googleApiIntegrator.fetchTextSearchResult(argument.textQuery)
                             .then(async (apiResponse) => {
                                 const formattedResponse = PlaceResponseFormatter(apiResponse!)
-
                                 formattedResponse.places.forEach(async(place) => {
                                     const data = await Attachment.findOne({ id: place.placeId })
-
                                     if(!data) {
                                         await Attachment.create({
                                             id: place.placeId,
@@ -109,7 +90,6 @@ export default async function assistantChat(request: ChatRequest){
                                         })
                                     }
                                 })
- 
                                 tool_outputs.push({
                                     tool_call_id: toolCall.id,
                                     output: JSON.stringify({
