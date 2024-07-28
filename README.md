@@ -11,6 +11,7 @@
 - Axios
 - Cors
 - Dotenv
+- Nodemon
 - Express
 - Mongodb
 - Mongoose
@@ -28,7 +29,17 @@ npm run dev
 
 ### Chat Router
 
-##### POST /api/chat/_submit
+#### /api/chat/_submit
+
+- Description:
+```txt
+Send chat to GRABesk bot
+```
+
+- Method:
+```json
+POST
+```
 - Request Body:
 
 ```json
@@ -45,7 +56,20 @@ npm run dev
 }
 ```
 
-##### GET /api/chat/:roomId/history
+<br />
+
+#### /api/chat/:roomId/history 
+
+- Description:
+```txt
+Get user's chat details history
+```
+
+- Method:
+```json
+GET
+```
+
 - Path Variable:
 ```json
 roomId
@@ -56,8 +80,20 @@ roomId
 -
 ```
 
+<br />
 
-##### POST /api/chat/summary
+#### /api/chat/summary
+
+- Description:
+```txt
+Get list of user's chat
+```
+
+- Method:
+```json
+POST 
+```
+
 - Request Body:
 ```json
 {
@@ -65,4 +101,116 @@ roomId
 }
 ```
 
-#### POST 
+<br />
+
+#### /api/chat/chatroom
+
+- Description:
+```txt
+Initiate new chat room
+```
+
+- Method:
+```json
+POST 
+```
+
+- Request Body:
+```json
+{
+  "user_id": "string"
+}
+```
+
+<br />
+
+#### /api/chat/_finalize
+
+- Description:
+```txt
+Finalize chat room
+```
+
+- Method:
+```json
+POST
+```
+
+- Request Body:
+```json
+{
+  "chat_room_id": "string"
+}
+```
+
+<br />
+<br />
+
+### User Router
+#### /api/users/_login
+
+- Description:
+```txt
+Endpoint for user to log in
+```
+
+- Method:
+```json
+POST
+```
+
+- Request Body:
+```json
+{
+  "phone": "string"
+}
+```
+
+<br />
+
+#### /api/users/_register
+
+- Description:
+```txt
+Endpoint for user to register
+```
+
+- Method:
+```json
+POST
+```
+
+- Request Body:
+
+```json
+{
+  "name": "string",
+  "phone": "string"
+}
+```
+
+<br />
+<br />
+
+### Attachment Router
+#### /api/attachments
+
+- Description:
+```txt
+Fetch all attachment
+```
+
+- Method:
+```json
+POST
+```
+
+- Request Body:
+```json
+{
+  "attachments": [
+    "string",
+    "string"
+  ]
+}
+```
